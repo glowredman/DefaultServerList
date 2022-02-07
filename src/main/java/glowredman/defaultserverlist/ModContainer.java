@@ -1,15 +1,20 @@
 package glowredman.defaultserverlist;
 
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod(acceptedMinecraftVersions = "[1.7.10]", dependencies = "required-after:spongemixins", modid = "defaultserverlist", name = "DefaultServerList", version = "GRADLETOKEN_VERSION")
+@Mod("defaultserverlist")
 public class ModContainer {
 	
-	@EventHandler
-	public static void preInit(FMLPreInitializationEvent event) {
-		Config.preInit(event.getModConfigurationDirectory());
+	public ModContainer() {
+		FMLJavaModLoadingContext.get().getModEventBus().register(this.getClass());
+	}
+	
+	@SubscribeEvent
+	public static void clientSetup(FMLClientSetupEvent event) {
+		Config.init();
 	}
 
 }

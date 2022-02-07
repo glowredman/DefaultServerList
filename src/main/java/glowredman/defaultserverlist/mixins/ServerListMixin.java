@@ -17,10 +17,9 @@ import net.minecraft.client.multiplayer.ServerList;
 @Mixin(ServerList.class)
 public class ServerListMixin {
 	
-	@SuppressWarnings("rawtypes")
 	@Shadow
 	@Final
-	private List servers;
+	private List<ServerData> serverList;
 	
 	/**
 	 * Gets the ServerData instance stored for the given index in the list.
@@ -28,23 +27,11 @@ public class ServerListMixin {
 	 * @author glowredman
 	 */
 	@Overwrite
-	public ServerData getServerData(int index) {
-		if(index < servers.size()) {
-			return (ServerData) servers.get(index);
+	public ServerData get(int index) {
+		if(index < serverList.size()) {
+			return (ServerData) serverList.get(index);
 		}
-		return Config.SERVERS.get(index - servers.size());
-	}
-	
-	/**
-	 * Removes the ServerData instance stored for the given index in the list.
-	 * @reason DefaultServerList
-	 * @author glowredman
-	 */
-	@Overwrite
-	public void removeServerData(int index) {
-		if(index < servers.size()) {
-			servers.remove(index);
-		}
+		return Config.SERVERS.get(index - serverList.size());
 	}
 	
 	/**
@@ -53,13 +40,13 @@ public class ServerListMixin {
 	 * @author glowredman
 	 */
 	@Overwrite
-	public int countServers() {
-		return servers.size() + Config.SERVERS.size();
+	public int size() {
+		return serverList.size() + Config.SERVERS.size();
 	}
 	
-	@Inject(method = "swapServers(II)V", at = @At("HEAD"), cancellable = true)
-	public void swapServers(int index1, int index2, CallbackInfo ci) {
-		if(index1 >= servers.size() || index2 >= servers.size()) {
+	@Inject(method = "swap(II)V", at = @At("HEAD"), cancellable = true)
+	public void swap(int pPos1, int pPos2, CallbackInfo ci) {
+		if(pPos1 >= serverList.size() || pPos2 >= serverList.size()) {
 			ci.cancel();
 		}
 	}
@@ -69,11 +56,10 @@ public class ServerListMixin {
 	 * @reason DefaultServerList
 	 * @author glowredman
 	 */
-	@SuppressWarnings("unchecked")
 	@Overwrite
-	public void func_147413_a(int index, ServerData data) {
-		if(index < servers.size()) {
-			servers.set(index, data);
+	public void replace(int index, ServerData data) {
+		if(index < serverList.size()) {
+			serverList.set(index, data);
 		}
 	}
 

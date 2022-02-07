@@ -1,0 +1,9 @@
+{
+    "package": "glowredman.defaultserverlist.mixins",
+    "client": [
+        "ServerListMixin"
+    ],
+    "refmap": "mixins.defaultserverlist.refmap.json",
+    "required": false,
+    "compatibilityLevel": "JAVA_17"
+}

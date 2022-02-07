@@ -4,11 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.spongepowered.asm.lib.tree.ClassNode;
+import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-
-import cpw.mods.fml.common.FMLCommonHandler;
 
 public class MixinPlugin implements IMixinConfigPlugin {
 
@@ -22,7 +20,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		return FMLCommonHandler.instance().getSide().isClient();
+		return true;
 	}
 
 	@Override
