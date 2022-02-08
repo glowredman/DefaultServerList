@@ -27,11 +27,11 @@ public class ServerListMixin {
 	 * @author glowredman
 	 */
 	@Overwrite
-	public ServerData get(int index) {
-		if(index < serverList.size()) {
-			return (ServerData) serverList.get(index);
+	public ServerData get(int pIndex) {
+		if(pIndex < serverList.size()) {
+			return (ServerData) serverList.get(pIndex);
 		}
-		return Config.SERVERS.get(index - serverList.size());
+		return Config.SERVERS.get(pIndex - serverList.size());
 	}
 	
 	/**
@@ -57,9 +57,9 @@ public class ServerListMixin {
 	 * @author glowredman
 	 */
 	@Overwrite
-	public void replace(int index, ServerData data) {
-		if(index < serverList.size()) {
-			serverList.set(index, data);
+	public void replace(int pIndex, ServerData pServer) {
+		if(pIndex < serverList.size()) {
+			serverList.set(pIndex, pServer);
 		}
 	}
 
