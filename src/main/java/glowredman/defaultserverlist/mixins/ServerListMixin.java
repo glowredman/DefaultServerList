@@ -19,7 +19,7 @@ public class ServerListMixin {
 	
 	@Shadow
 	@Final
-	private List<ServerData> serverList;
+	private List<ServerData> servers;
 	
 	/**
 	 * Gets the ServerData instance stored for the given index in the list.
@@ -27,11 +27,11 @@ public class ServerListMixin {
 	 * @author glowredman
 	 */
 	@Overwrite
-	public ServerData get(int pIndex) {
-		if(pIndex < serverList.size()) {
-			return (ServerData) serverList.get(pIndex);
+	public ServerData getServerData(int index) {
+		if(index < servers.size()) {
+			return (ServerData) servers.get(index);
 		}
-		return Config.SERVERS.get(pIndex - serverList.size());
+		return Config.SERVERS.get(index - servers.size());
 	}
 	
 	/**
@@ -40,13 +40,13 @@ public class ServerListMixin {
 	 * @author glowredman
 	 */
 	@Overwrite
-	public int size() {
-		return serverList.size() + Config.SERVERS.size();
+	public int countServers() {
+		return servers.size() + Config.SERVERS.size();
 	}
 	
-	@Inject(method = "swap(II)V", at = @At("HEAD"), cancellable = true)
-	public void swap(int pPos1, int pPos2, CallbackInfo ci) {
-		if(pPos1 >= serverList.size() || pPos2 >= serverList.size()) {
+	@Inject(method = "swapServers(II)V", at = @At("HEAD"), cancellable = true)
+	public void swapServers(int pos1, int pos2, CallbackInfo ci) {
+		if(pos1 >= servers.size() || pos2 >= servers.size()) {
 			ci.cancel();
 		}
 	}
@@ -57,9 +57,9 @@ public class ServerListMixin {
 	 * @author glowredman
 	 */
 	@Overwrite
-	public void replace(int pIndex, ServerData pServer) {
-		if(pIndex < serverList.size()) {
-			serverList.set(pIndex, pServer);
+	public void set(int index, ServerData server) {
+		if(index < servers.size()) {
+			servers.set(index, server);
 		}
 	}
 
