@@ -17,13 +17,13 @@ apply plugin: 'eclipse'
 
 version = '1.0'
 group = 'glowredman.defaultserverlist'
-archivesBaseName = 'defaultserverlist'
+archivesBaseName = 'defaultserverlist-1.17'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(16)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'parchment', version: '2022.01.23-1.18.1'
+    mappings channel: 'parchment', version: '2021.12.12-1.17.1'
     runs {
         client {
             workingDirectory project.file('run')
@@ -70,7 +70,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 repositories {}
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.1-39.0.66'
+    minecraft 'net.minecraftforge:forge:1.17.1-37.1.1'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
