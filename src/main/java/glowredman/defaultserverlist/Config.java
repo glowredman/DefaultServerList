@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
-import org.openjdk.nashorn.api.scripting.URLReader;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -28,7 +27,6 @@ public class Config {
 	
 	public static void init() {
 		Reader fileReader = null;
-		Reader urlReader = null;
 		try {
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			Path path = FMLPaths.CONFIGDIR.get().resolve("defaultserverlist.json");
@@ -43,8 +41,7 @@ public class Config {
 			
 			Map<String, String> servers;
 			if(config.useURL) {
-				urlReader = new URLReader(new URL(config.url), StandardCharsets.UTF_8);
-				servers = gson.fromJson(urlReader, new TypeToken<Map<String, String>>() {private static final long serialVersionUID = -1786059589535074931L;}.getType());
+				servers = gson.fromJson(IOUtils.toString(new URL(config.url), StandardCharsets.UTF_8), new TypeToken<Map<String, String>>() {private static final long serialVersionUID = -1786059589535074931L;}.getType());
 			} else {
 				servers = config.servers;
 			}
@@ -55,7 +52,7 @@ public class Config {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			IOUtils.closeQuietly(fileReader, urlReader);
+			IOUtils.closeQuietly(fileReader);
 		}
 	}
 	
