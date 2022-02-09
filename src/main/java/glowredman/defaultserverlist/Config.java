@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class Config {
 			ConfigObj config = new ConfigObj();
 			
 			if(!Files.exists(path)) {
-				Files.writeString(path, gson.toJson(config), StandardCharsets.UTF_8);
+				Files.write(path, Arrays.asList(gson.toJson(config)), StandardCharsets.UTF_8);
 			} else {
 				fileReader = Files.newBufferedReader(path, StandardCharsets.UTF_8);
 				config = gson.fromJson(fileReader, ConfigObj.class);
