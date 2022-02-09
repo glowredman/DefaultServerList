@@ -1,7 +1,6 @@
 package glowredman.defaultserverlist;
 
 import java.io.Reader;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,10 +42,8 @@ public class Config {
 			
 			Map<String, String> servers;
 			if(config.useURL) {
-				Type type = new TypeToken<Map<String, String>>() {
-					private static final long serialVersionUID = -1786059589535074931L;}.getType();
 				urlReader = new URLReader(new URL(config.url), StandardCharsets.UTF_8);
-				servers = gson.fromJson(urlReader, type);
+				servers = gson.fromJson(urlReader, new TypeToken<Map<String, String>>() {private static final long serialVersionUID = -1786059589535074931L;}.getType());
 			} else {
 				servers = config.servers;
 			}
