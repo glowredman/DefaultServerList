@@ -79,16 +79,14 @@ public class ServerListMixin {
 	}
 
     /**
-     * Removes the ServerData instance stored for the given index in the list.
+     * Removes the ServerData instance from the default server list if deletions are allowed
      * @reason DefaultServerList
      * @author glowredman
      */
-    @Overwrite
-    public void func_217506_a(int index) {
-        if (index < servers.size()) {
-            servers.remove(index);
-        } else if (Config.config.allowDeletions) {
-            Config.SERVERS.remove(index - servers.size());
+    @Inject(at = @At("HEAD"), method = "func_217506_a(Lnet/minecraft/client/multiplayer/ServerData;)V")
+    public void removeDefaultServer(ServerData server) {
+        if (Config.config.allowDeletions) {
+            Config.SERVERS.remove(server);
         }
     }
 	
