@@ -3,6 +3,7 @@ package glowredman.defaultserverlist;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
 import cpw.mods.fml.common.FMLLog;
 import java.io.File;
 import java.io.IOException;
@@ -13,17 +14,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import net.minecraft.client.multiplayer.ServerData;
 import org.apache.commons.io.IOUtils;
 
 public class Config {
 
-    public static boolean allowDeletions;
-    public static String url;
+    public static ConfigObj config = new ConfigObj();
     public static final List<ServerData> SERVERS = new ArrayList<>();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static Path configPath;
@@ -32,7 +32,6 @@ public class Config {
         Reader fileReader = null;
         try {
             configPath = configDir.toPath().resolve("defaultserverlist.json");
-            ConfigObj config = new ConfigObj();
 
             if (!Files.exists(configPath)) {
                 saveConfig(config);
@@ -41,26 +40,45 @@ public class Config {
                 config = GSON.fromJson(fileReader, ConfigObj.class);
             }
 
-            allowDeletions = config.allowDeletions;
-            url = config.url;
-
-            Map<String, String> servers;
             if (config.useURL) {
-                servers = GSON.fromJson(
-                        IOUtils.toString(new URL(config.url), StandardCharsets.UTF_8),
-                        new TypeToken<Map<String, String>>() {
-                            private static final long serialVersionUID = -1786059589535074931L;
-                        }.getType());
-                ConfigObj newConfig = new ConfigObj(servers);
-                newConfig.useURL = !allowDeletions;
-                saveConfig(newConfig);
-            } else {
-                servers = config.servers;
+                try {
+                    // servers that are currently at the remote location
+                    Map<String, String> remoteDefaultServers = GSON.fromJson(
+                            IOUtils.toString(new URL(config.url), StandardCharsets.UTF_8),
+                            new TypeToken<LinkedHashMap<String, String>>() {
+                                private static final long serialVersionUID = -1786059589535074931L;
+                            }.getType());
+
+                    if (config.allowDeletions) {
+                        // servers that were added to the remote location since the last time the list was fetched
+                        Map<String, String> diff = new LinkedHashMap<>();
+
+                        // calculate diff
+                        remoteDefaultServers.forEach((name, ip) -> {
+                            if (!config.prevDefaultServers.contains(ip)) {
+                                diff.put(name, ip);
+                            }
+                        });
+
+                        // save if the remote location was updated
+                        if (!diff.isEmpty()) {
+                            config.servers.putAll(diff);
+                            config.prevDefaultServers = remoteDefaultServers.values();
+                            saveConfig(config);
+                        }
+                        
+                    } else {
+                        config.servers = remoteDefaultServers;
+                        saveConfig(config);
+                    }
+                } catch (Exception e) {
+                    FMLLog.warning(
+                            "Could not get default server list from default location! Are you connected to the internet?");
+                    e.printStackTrace();
+                }
             }
 
-            for (Entry<String, String> e : servers.entrySet()) {
-                SERVERS.add(new ServerData(e.getKey(), e.getValue()));
-            }
+            config.servers.forEach((name, ip) -> SERVERS.add(new ServerData(name, ip)));
 
         } catch (Exception e) {
             FMLLog.severe("Could not parse default server list!");
@@ -83,7 +101,10 @@ public class Config {
         public boolean useURL = false;
         public boolean allowDeletions = true;
         public String url = "";
-        public Map<String, String> servers = new HashMap<>();
+        public Map<String, String> servers = new LinkedHashMap<>();
+
+        @SerializedName("DO_NOT_EDIT_prevDefaultServers")
+        public Collection<String> prevDefaultServers = new ArrayList<>();
 
         public ConfigObj() {}
 

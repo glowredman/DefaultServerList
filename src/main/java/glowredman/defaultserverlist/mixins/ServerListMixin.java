@@ -1,8 +1,7 @@
 package glowredman.defaultserverlist.mixins;
 
 import glowredman.defaultserverlist.Config;
-import glowredman.defaultserverlist.Config.ConfigObj;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.multiplayer.ServerData;
@@ -54,14 +53,12 @@ public class ServerListMixin {
      */
     @Inject(at = @At("TAIL"), method = "saveServerList()V")
     private void saveDefaultServerList(CallbackInfo ci) {
-        if (Config.allowDeletions) {
+        if (Config.config.allowDeletions) {
             try {
-                Map<String, String> map = new HashMap<>();
-                Config.SERVERS.forEach(sd -> map.put(sd.serverName, sd.serverIP));
-                ConfigObj newConfig = new ConfigObj(map);
-                newConfig.allowDeletions = Config.allowDeletions;
-                newConfig.url = Config.url;
-                Config.saveConfig(newConfig);
+                Map<String, String> newServers = new LinkedHashMap<>();
+                Config.SERVERS.forEach(serverData -> newServers.put(serverData.serverName, serverData.serverIP));
+                Config.config.servers = newServers;
+                Config.saveConfig(Config.config);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -90,7 +87,7 @@ public class ServerListMixin {
     public void removeServerData(int index) {
         if (index < servers.size()) {
             servers.remove(index);
-        } else if (Config.allowDeletions) {
+        } else if (Config.config.allowDeletions) {
             Config.SERVERS.remove(index - servers.size());
         }
     }
