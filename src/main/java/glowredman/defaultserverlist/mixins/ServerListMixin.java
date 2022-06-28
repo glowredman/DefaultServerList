@@ -1,6 +1,8 @@
 package glowredman.defaultserverlist.mixins;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,6 +22,48 @@ public class ServerListMixin {
 	@Shadow
 	@Final
 	private List<ServerData> serverList;
+
+    /**
+     * Removes all servers from servers.dat that are already in the default list
+     * @author glowredman
+     */
+    @Inject(at = @At("TAIL"), method = "load()V")
+    private void removeDuplicateServers(CallbackInfo ci) {
+    	serverList.removeIf(o -> {
+            String s1 = ((ServerData) o)
+                    .ip
+                    .replace("http://", "")
+                    .replace("https://", "")
+                    .replace(":25565", "");
+            for (ServerData s2 : Config.SERVERS) {
+                if (s1.equals(s2.ip
+                        .replace("http://", "")
+                        .replace("https://", "")
+                        .replace(":25565", ""))) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Save default servers
+     * @author glowredman
+     */
+    @Inject(at = @At("TAIL"), method = "save()V")
+    private void saveDefaultServerList(CallbackInfo ci) {
+        if (Config.config.allowDeletions) {
+            try {
+                Map<String, String> newServers = new LinkedHashMap<>();
+                Config.SERVERS.forEach(serverData -> newServers.put(serverData.name, serverData.ip));
+                Config.config.servers = newServers;
+                Config.saveConfig(Config.config);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 	
 	/**
 	 * Gets the ServerData instance stored for the given index in the list.
@@ -33,6 +77,18 @@ public class ServerListMixin {
 		}
 		return Config.SERVERS.get(pIndex - serverList.size());
 	}
+
+    /**
+     * Removes the ServerData instance from the default server list if deletions are allowed
+     * @reason DefaultServerList
+     * @author glowredman
+     */
+    @Inject(at = @At("HEAD"), method = "remove(Lnet/minecraft/client/multiplayer/ServerData;)V")
+    public void removeDefaultServer(ServerData server) {
+        if (Config.config.allowDeletions) {
+            Config.SERVERS.remove(server);
+        }
+    }
 	
 	/**
 	 * Counts the number of ServerData instances in the list.
