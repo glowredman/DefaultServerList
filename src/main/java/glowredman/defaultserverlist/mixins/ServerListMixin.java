@@ -1,6 +1,8 @@
 package glowredman.defaultserverlist.mixins;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,6 +22,48 @@ public class ServerListMixin {
 	@Shadow
 	@Final
 	private List<ServerData> servers;
+
+    /**
+     * Removes all servers from servers.dat that are already in the default list
+     * @author glowredman
+     */
+    @Inject(at = @At("TAIL"), method = "loadServerList()V")
+    private void removeDuplicateServers(CallbackInfo ci) {
+        servers.removeIf(o -> {
+            String s1 = ((ServerData) o)
+                    .serverIP
+                    .replace("http://", "")
+                    .replace("https://", "")
+                    .replace(":25565", "");
+            for (ServerData s2 : Config.SERVERS) {
+                if (s1.equals(s2.serverIP
+                        .replace("http://", "")
+                        .replace("https://", "")
+                        .replace(":25565", ""))) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Save default servers
+     * @author glowredman
+     */
+    @Inject(at = @At("TAIL"), method = "saveServerList()V")
+    private void saveDefaultServerList(CallbackInfo ci) {
+        if (Config.config.allowDeletions) {
+            try {
+                Map<String, String> newServers = new LinkedHashMap<>();
+                Config.SERVERS.forEach(serverData -> newServers.put(serverData.serverName, serverData.serverIP));
+                Config.config.servers = newServers;
+                Config.saveConfig(Config.config);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 	
 	/**
 	 * Gets the ServerData instance stored for the given index in the list.
@@ -33,6 +77,20 @@ public class ServerListMixin {
 		}
 		return Config.SERVERS.get(index - servers.size());
 	}
+
+    /**
+     * Removes the ServerData instance stored for the given index in the list.
+     * @reason DefaultServerList
+     * @author glowredman
+     */
+    @Overwrite
+    public void func_217506_a(int index) {
+        if (index < servers.size()) {
+            servers.remove(index);
+        } else if (Config.config.allowDeletions) {
+            Config.SERVERS.remove(index - servers.size());
+        }
+    }
 	
 	/**
 	 * Counts the number of ServerData instances in the list.
