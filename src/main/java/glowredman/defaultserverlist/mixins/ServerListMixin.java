@@ -4,6 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -11,6 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import glowredman.defaultserverlist.Config;
 import net.minecraft.client.multiplayer.ServerData;
@@ -77,6 +80,23 @@ public class ServerListMixin {
 		}
 		return Config.SERVERS.get(pIndex - serverList.size());
 	}
+	
+	/**
+	 * Gets the ServerData instance stored for the given ip in the list.
+	 * @reason DefaultServerList
+	 * @author glowredman
+	 */
+	@Nullable
+	@Inject(at = @At("TAIL"), method = "get(Ljava/lang/String;)Lnet/minecraft/client/multiplayer/ServerData;")
+	private void getFromDSL(String ip, CallbackInfoReturnable<ServerData> ci) {
+		for(ServerData serverData : Config.SERVERS) {
+			if(serverData.ip.equals(ip)) {
+				ci.setReturnValue(serverData);
+				return;
+			}
+		}
+		ci.setReturnValue(null);
+	}
 
     /**
      * Removes the ServerData instance from the default server list if deletions are allowed
@@ -84,7 +104,7 @@ public class ServerListMixin {
      * @author glowredman
      */
     @Inject(at = @At("HEAD"), method = "remove(Lnet/minecraft/client/multiplayer/ServerData;)V")
-    public void removeDefaultServer(ServerData server) {
+    public void removeDefaultServer(ServerData server, CallbackInfo ci) {
         if (Config.config.allowDeletions) {
             Config.SERVERS.remove(server);
         }

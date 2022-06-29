@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.+', changing: true
         classpath group: 'org.parchmentmc', name: 'librarian', version: '1.+', changing: true
         classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7.+', changing: true
     }
@@ -17,13 +17,13 @@ apply plugin: 'eclipse'
 
 version = '1.2'
 group = 'glowredman.defaultserverlist'
-archivesBaseName = 'defaultserverlist-1.18'
+archivesBaseName = 'defaultserverlist-1.19'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'parchment', version: '1.18.1-2022.03.06-1.18.2'
+    mappings channel: 'parchment', version: '1.18.2-2022.06.26-1.19'
     runs {
         client {
             workingDirectory project.file('run')
@@ -70,7 +70,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 repositories {}
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.0.12'
+    minecraft 'net.minecraftforge:forge:1.19-41.0.62'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
