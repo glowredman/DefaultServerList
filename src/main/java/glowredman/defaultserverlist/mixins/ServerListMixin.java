@@ -84,7 +84,7 @@ public class ServerListMixin {
      * @author glowredman
      */
     @Inject(at = @At("HEAD"), method = "func_217506_a(Lnet/minecraft/client/multiplayer/ServerData;)V")
-    public void removeDefaultServer(ServerData server) {
+    public void removeDefaultServer(ServerData server, CallbackInfo ci) {
         if (Config.config.allowDeletions) {
             Config.SERVERS.remove(server);
         }
