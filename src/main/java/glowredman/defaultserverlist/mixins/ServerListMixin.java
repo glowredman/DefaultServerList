@@ -21,10 +21,11 @@ public class ServerListMixin {
     @Shadow
     @Final
     private List servers;
-    
+
     @Shadow
     public void saveServerList() {
-        throw new IllegalStateException("Failed to apply mixin " + this.getClass().getName());
+        throw new IllegalStateException(
+                "Failed to apply mixin " + this.getClass().getName());
     }
 
     /**
@@ -115,12 +116,12 @@ public class ServerListMixin {
     @SuppressWarnings("unchecked")
     @Overwrite
     public void swapServers(int index1, int index2) {
-        if(index1 < servers.size() && index2 < servers.size()) {
+        if (index1 < servers.size() && index2 < servers.size()) {
             ServerData serverData = this.getServerData(index1);
             this.servers.set(index1, this.getServerData(index2));
             this.servers.set(index2, serverData);
             this.saveServerList();
-        } else if(index1 >= servers.size() && index2 >= servers.size()) {
+        } else if (index1 >= servers.size() && index2 >= servers.size()) {
             ServerData serverData = this.getServerData(index1);
             Config.SERVERS.set(index1 - servers.size(), this.getServerData(index2));
             Config.SERVERS.set(index2 - servers.size(), serverData);
