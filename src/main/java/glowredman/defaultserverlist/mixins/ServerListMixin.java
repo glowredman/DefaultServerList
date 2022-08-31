@@ -26,6 +26,11 @@ public class ServerListMixin {
 	@Final
 	private List<ServerData> serverList;
 
+    @Shadow
+    public void save() {
+        throw new IllegalStateException("Failed to apply mixin " + this.getClass().getName());
+    }
+
     /**
      * Removes all servers from servers.dat that are already in the default list
      * @author glowredman
@@ -120,12 +125,25 @@ public class ServerListMixin {
 		return serverList.size() + Config.SERVERS.size();
 	}
 	
-	@Inject(method = "swap(II)V", at = @At("HEAD"), cancellable = true)
-	public void swap(int pPos1, int pPos2, CallbackInfo ci) {
-		if(pPos1 >= serverList.size() || pPos2 >= serverList.size()) {
-			ci.cancel();
-		}
-	}
+	/**
+     * Takes two list indexes, and swaps their order around.
+     * @reason DefaultServerList
+     * @author Quarri6343, glowredman
+	 */
+    @Overwrite
+    public void swap(int pPos1, int pPos2) {
+        if(pPos1 < serverList.size() && pPos2 < serverList.size()) {
+            ServerData serverData = this.get(pPos1);
+            this.replace(pPos1, this.get(pPos2));
+            this.replace(pPos2, serverData);
+            this.save();
+        } else if(pPos1 >= serverList.size() && pPos2 >= serverList.size()) {
+            ServerData serverData = this.get(pPos1);
+            Config.SERVERS.set(pPos1 - serverList.size(), this.get(pPos2));
+            Config.SERVERS.set(pPos2 - serverList.size(), serverData);
+            this.saveDefaultServerList(null);
+        }
+    }
 	
 	/**
 	 * Sets the ServerData instance stored for the given index in the list.
